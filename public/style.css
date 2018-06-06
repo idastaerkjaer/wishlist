@@ -1,0 +1,99 @@
+body{
+    background-color: #6C757D;
+    padding-top: 55px;
+    padding-bottom: 55px;
+
+
+}
+
+#header{
+    margin: 0;
+}
+
+#container{
+    padding: 0px;
+}
+
+.content{
+    margin: 15px ;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 15px;
+
+}
+
+.content:hover{
+    opacity: 1;
+}
+
+.content h2{
+    text-align: center;
+    color: #343A40;
+}
+
+.content h5, .content h6{
+    text-align: center;
+    line-height: 40px;
+    background-color: #6C757D;
+    border-radius: 5px;
+    color: #ffffff;
+}
+
+.content h5:hover, .content h6:hover{
+    background-color: #5A6268;
+}
+
+.content h5:active, .content h6:active{
+    background-color: #545b60;
+}
+
+.content a:hover, .content a:visited, .content a:link, .content a:active{
+    text-decoration: none;
+}
+
+#deletuserbutton:hover, #deletuserbutton:active{
+    background-color: red;
+}
+
+.delete-wishlist, .delete-wish{
+    text-align: center;
+    background-color: #6C757D;
+    border: 1px solid #6C757D;
+    border-radius: 5px;
+    line-height: 40px;
+    padding: 5px;
+}
+
+.delete-wishlist:hover, .delete-wishlist:active, .delete-wish:hover, .delete-wish:hover{
+    background-color: red;
+}
+
+#footer{
+    height: 55px;
+}
+
+#footer h5, #footer h6{
+    text-align: center;
+    background-color: #ffffff;
+    border-radius: 5px;
+    line-height: 40px;
+    color: #6C757D;
+    padding: 0px 50px;
+    margin: 0px;
+}
+
+#footer h5:hover, #footer h6:hover{
+    background-color: #5A6268;
+}
+
+#footer h5:active, #footer h6:active{
+    background-color: #545b60;
+}
+
+#footer a:hover, #footer a:visited, #footer a:link, #footer a:active{
+    text-decoration: none;
+}
+
+.modal-content{
+    border-radius: 15px;
+}

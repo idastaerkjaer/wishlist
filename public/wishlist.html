@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <meta name="description" content="">
+    <meta name="author" content="Ida Stærkjær Nielsen">
+    <link rel="icon" href="">
+
+    <title>Wish;list - {listname}</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
+
+    <!-- unsplash api -->
+    <style>
+        #container{
+            background-image: url("");
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container" class="container-fluid">
+    
+        <div id="header" class="navbar fixed-top navbar-expand navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">Wish;list</a>
+
+            <div class="collapse navbar-collapse" id="navbarsExample02">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="wishlist.html" id="listname"></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="wishlists.html">All lists</a>
+                    </li>
+                </ul>
+
+                <button id="signout" class="btn btn-s btn-secondary" type="submit">Sign out</button>               
+
+            </div>
+        </div>
+    
+        <div id="wishes">
+
+            <!-- wishes here -->
+
+        </div>
+
+
+        <div id="footer" class="navbar fixed-bottom navbar-expand navbar-dark bg-dark">
+
+            <button type="button" class="btn btn-primary" id="createeventbutton" data-toggle="modal" data-target="#wishesModal">Add wish</button>
+
+        </div>
+
+        <div class="modal fade" id="wishesModal" tabindex="-1" role="dialog" aria-labelledby="wishesModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="wishesModalLabel">Add a wish to your wishlist</h5>
+
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-input" id="formAddWish">
+                        
+                        <div class="form-group">
+                            <label for="inputWishname" class="sr-only">Name</label>
+                            <input type="text" id="wishname" class="form-control" placeholder="Input wish name" required autofocus>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputWishprice" class="sr-only">Price</label>
+                            <input type="text" id="wishprice" class="form-control" placeholder="Input price of wish" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputWishinfo" class="sr-only">Info</label>
+                            <input type="text" id="wishinfo" class="form-control" placeholder="Type some more info" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add wish</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <!-- script related to modal-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+    <!-- script related to socket-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js" crossorigin="anonymous"></script>
+    
+    <script>
+        window.initializeView = function (socket, frontend, api) {
+            // What to do when the "new message" event is received
+            socket.on('new wish', wish => {
+                reloadWishes();
+            });
+
+            let formAddWish = document.querySelector('#formAddWish')
+            let wishnameField = document.querySelector('#wishname')
+            let wishpriceField = document.querySelector('#wishprice')
+            let wishinfoField = document.querySelector('#wishinfo')
+
+            formAddWish.addEventListener('submit', e => {
+                e.preventDefault()
+
+                addWish()
+            })
+
+            function addWish() {
+                let options = {
+                    method: 'post',
+                    credentials: 'include',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        wishname: wishnameField.value,
+                        wishprice: wishpriceField.value,
+                        wishinfo: wishinfoField.value,
+                        wishlistId: api.getURLParams().id
+                    })
+                }
+
+                fetch('/api/wishes', options)
+                .then(response => response.json())
+                .then(response => {
+                    if (response.status == 'OK') {
+                        $('.modal').modal('hide');
+
+                        reloadWishes();
+                    } else {
+                        alert(response.message)
+                    }
+                })
+            }
+
+            let userwishlist;
+
+            const params = api.getURLParams();
+
+            function reloadWishes() {
+                // Load all wishlists and display them
+                api.getWishes(params.id)
+                    .then(allWishes => {
+                        wishes = allWishes
+
+                        frontend.displayWishes(wishes, {
+                            relation: userwishlist.relation
+                        })
+
+                        const deleteWishButtons = document.querySelectorAll('.delete-wish');
+
+                        if (deleteWishButtons.length > 0) {
+                            deleteWishButtons.forEach((button) => {
+                                button.addEventListener('click', function () {
+                                    const id = this.getAttribute('data-id');
+
+                                    let options = {
+                                        method: 'delete',
+                                        credentials: 'include'
+                                    }
+
+                                    fetch('/api/wishes/' + id, options)
+                                        .then(response => response.text())
+                                        .then(response => {
+                                            if (response === 'OK') {
+                                                reloadWishes();
+                                            } else {
+                                                alert(response)
+                                            }
+                                        })
+                                        .catch((error) => {
+                                            console.log(error);
+                                        })
+                                });
+                            });
+                        }
+                    });
+            }
+
+            api.getWishlist(params.id)
+                .then(_userwishlist => {
+                    userwishlist = _userwishlist;
+                    
+                    document.body.style.minHeight = '100vh';
+                    document.body.style.backgroundPosition = 'center center';
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                    document.body.style.backgroundImage = 'url(' + userwishlist.wishlist.themeimage + ')';
+    
+                    document.getElementById('listname').innerHTML = userwishlist.wishlist.listname;
+                    document.getElementById('listname').setAttribute('href', '/wishlist.html?id=' + params.id);
+
+                    if (userwishlist.relation == 'guest') {
+                        document.getElementById('footer').style.display = 'none';
+                    }
+
+                    reloadWishes();
+                });
+        }
+    </script>      
+
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <meta name="description" content="">
+    <meta name="author" content="Ida Stærkjær Nielsen">
+    <link rel="icon" href="">
+
+    <title>Wish;list - Dashboard</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
+</head>
+<body>
+    
+    <div id="container" class="container-fluid">
+        
+        <div id="header" class="navbar fixed-top navbar-expand navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">Wish;list</a>
+
+            <div class="collapse navbar-collapse" id="navbarsExample02">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Dashboard</a>
+                    </li>
+                </ul>
+
+                <button id="signout" class="btn btn-s btn-secondary" type="submit">Sign out</button>               
+
+            </div>
+        </div>
+
+        <div id="myprofile" class="content">
+
+            <h2>My profile</h2>
+
+            <table class="table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Id</th>
+                            <td><%= id %></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Name</th>
+                            <td><%= username %></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">password</th>
+                            <td>****** </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            <div class="row">
+                <div class="col">
+                        <button type="button" class="btn btn-block btn-secondary" id="deletuserbutton" >Delete profile</button>
+                    </div>
+                <div class="col">
+                    <button type="button" class="btn btn-block btn-secondary" id="createeventbutton" data-toggle="modal" data-target="#updateuserModal">Edit profile</button>
+                </div>
+            </div>
+
+        </div>
+        <div id="mywishespreview" class="content text-center">
+            <h2>Wish;lists</h2>
+            <p>Click here to see an overview of all lists where you are either an owner or a guest.
+                You have edit priveleges in your own lists, but you can only view the other lists.
+            </p>
+            <a href="wishlists.html"><h5>See all</h5></a>
+        </div>
+
+        <div id="footer" class="navbar fixed-bottom navbar-expand navbar-dark bg-dark">
+            <span class="text-muted">made by Ida Stærkjær Nielsen</span>
+        </div>
+
+        <div class="modal fade" id="updateuserModal" tabindex="-1" role="dialog" aria-labelledby="updateuserModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateuserModalLabel">Update your details</h5>
+
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-input" id="formUpdateuser">
+                        
+                        <div class="form-group">
+                            <label for="inputNewusername" class="sr-only">new username</label>
+                            <input type="text" id="newusername" class="form-control" placeholder="Input new username" autofocus>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputNewpassword" class="sr-only">New password</label>
+                            <input type="text" id="newpassword" class="form-control" placeholder="Input new password">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- script related to modal-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+    <!-- script related to socket-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js" crossorigin="anonymous"></script>
+
+    <script>
+   
+        let formUpdateuser = document.querySelector('#formUpdateuser')
+        let newusernameField = document.querySelector('#newusername')
+        let newpasswordField = document.querySelector('#newpassword')
+
+        formUpdateuser.addEventListener('submit', e => {
+            e.preventDefault()
+
+            UpdateUser()
+        })
+
+        function UpdateUser() {
+            let options = {
+                method: 'put',
+                credentials: 'include',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    newusername: newusernameField.value,
+                    newpassword: newpasswordField.value
+                })
+            }
+
+            fetch('/api/user', options)
+                .then(response => response.json())
+                .then(response => {
+                    if (!response.message) {
+                        window.location.reload();
+                    } else {
+                        alert(response.message)
+                    }
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        }
+
+
+        deletuserbutton.addEventListener('click', e => {
+            e.preventDefault()
+
+            DeleteUser()
+        })
+
+        function DeleteUser() {
+            let options = {
+                method: 'delete',
+                credentials: 'include'
+            }
+
+            fetch('/api/user', options)
+                .then(response => response.text())
+                .then(response => {
+                    if (response === 'OK') {
+                        window.location.reload();
+                    } else {
+                        alert(response)
+                    }
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        }
+
+    </script>
+
+    <script src="app.js"></script>
+</body>
+</html>
